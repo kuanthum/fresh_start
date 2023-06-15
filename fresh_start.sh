@@ -20,7 +20,7 @@ for package in "${apt_packages[@]}"; do
 done
 
 # List of packages with configs
-curl_packages=(
+other_packages=(
 	["pyenv"]="
 		curl https://pyenv.run | bash
 		echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
@@ -30,9 +30,11 @@ curl_packages=(
 	["teamviewer"]="
 		wget -P ~/Downloads https://download.teamviewer.com/download/linux/teamviewer_amd64.deb &&
 		sudo apt install ~/Downloads/teamviewer_amd64.deb"
+	["pipx"]="
+		pip install --user pipx
+		pipx ensurepath
+		"
 )
-
-# sudo /root/.local/bin/pipx ensurepath
 
 # Install with curl packages func
 execute_command(){
@@ -52,23 +54,4 @@ for cmd in "${!curl_packages[@]}"; do
 	execute_command "$cmd" "${curl_packages[$cmd]}"
 done
 
-# Raw download 
-file_list=(
-        ["init.vim"]=("https://raw.githubusercontent.com/your-username/your-repo/main/init.vim" "$HOME/.config/nvim/init.vim")
-)
-
-for file in "${!file_list[@]}"; do
-    params=("${file_list[$file]}")
-    url="${params[0]}"
-    destination="${params[1]}"
-
-    if [ -e "$destination" ]; then
-        echo "File $file already exists at $destination. Skipping download."
-    else
-        echo "Downloading $file to $destination..."
-        curl -o "$destination" "$url"
-    fi
-done
-
-echo "Installation completed."
 
