@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# List of packages
+# Ensure to have user and group permisions on /home/.local
+
+# --- APT PACKAGES ---
 apt_packages=(
 	"git"
 	"neovim"
@@ -10,7 +12,6 @@ apt_packages=(
 	"python3-venv"
 )
 
-# Install apt packages func
 for package in "${apt_packages[@]}"; do
 	if ! dpkg -s "$package" >/dev/null 2>&1 && ! command -v "$package" >/dev/null 2>&1; then
 		echo "Installing $package..."
@@ -19,9 +20,10 @@ for package in "${apt_packages[@]}"; do
 		echo "$package is already installed."
 	fi
 done
+# ----
 
-# List of packages with configs
-other_packages=(
+# --- OTHER PACKAGES ---
+declare -A other_packages=(
 	["pyenv"]="
 		curl https://pyenv.run | bash
 		echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
@@ -39,15 +41,11 @@ other_packages=(
 		pipx install poetry"
 )
 
-# Install with curl packages func
-
-# &>/dev/null
 execute_command(){
-
 	local command="$1"
 	local execute_string="$2"
 
-	if ! command -v "$command" >/dev/null 2>&1; then
+	if ! command -v "$command" >/dev/null; then
 		echo "executing $execute_string..."
 		eval "$execute_string"
 	else
@@ -58,5 +56,38 @@ execute_command(){
 for cmd in "${!other_packages[@]}"; do
 	execute_command "$cmd" "${other_packages[$cmd]}"
 done
+# ----
 
+# --- FILES ---
 
+declare -A files=(
+	["init.vim"]="https://raw.githubusercontent.com/kuanthum/agu_nvim_config/master/init.vim|$HOME/.config/nvim"
+)
+
+for file in "${!files[@]}"; do
+	url="${files[$file]%%|*}"
+	folder="${files[$file]#*|}"
+
+	if [ -f "$folder/$file" ]; then
+		echo "$file is already downloaded in $folder."
+
+	else
+		echo $folder
+		
+		if [ ! -d "$folder" ]; then
+			echo "Creating folder: $folder"
+			mkdir -p "$folder"
+		fi
+
+		echo "Downloading $file..."
+		curl -o "$folder/$file" "$url"
+
+		if [ $? -eq O ]; then
+			echo "$file downloaded succesfully."
+		else
+			echo "Failded to download $file."
+		fi
+	fi
+# ----
+
+# --- VIM PLUGS ---
