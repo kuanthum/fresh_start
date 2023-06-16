@@ -10,6 +10,7 @@ apt_packages=(
 	"curl"
 	"tmux"
 	"python3-venv"
+	"fonts-powerline"
 )
 
 for package in "${apt_packages[@]}"; do
@@ -60,8 +61,10 @@ done
 # --- FILES & CONFIGS ---
 declare -A files=(
 	["init.vim"]="https://raw.githubusercontent.com/kuanthum/agu_nvim_config/master/init.vim|$HOME/.config/nvim"
-	[".tmux.conf"]="create|$HOME/.config/tmux"
+	[".tmux.conf"]="create|$HOME" # In future replace this for file config in github
 	["tpm"]="git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm|$HOME/.tmux/plugins"
+	# Checkear esto
+	["gnome-terminal"]="git clone https://github.com/catppuccin/gnome-terminal ~.$HOME/Agu/TermThemes|$HOME/Agu/TermThemes"
 )
 
 for file in "${!files[@]}"; do
@@ -114,11 +117,6 @@ for file in "${!files[@]}"; do
 
 done
 # ----
-
-
-
-# ---- tmux plugin manager config ----
-file="$HOME/.config/tmux/tmux.conf"
 
 
 
