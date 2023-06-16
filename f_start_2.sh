@@ -35,8 +35,7 @@ declare -A other_packages=(
 		sudo apt install ~/Downloads/teamviewer_amd64.deb"
 	["pipx"]="
 		pip install --user pipx || exit 1
-		pipx ensurepath
-		"
+		pipx ensurepath"
 	["poetry"]="
 		pipx install poetry"
 )
@@ -58,36 +57,68 @@ for cmd in "${!other_packages[@]}"; do
 done
 # ----
 
-# --- FILES ---
-
+# --- FILES & CONFIGS ---
 declare -A files=(
 	["init.vim"]="https://raw.githubusercontent.com/kuanthum/agu_nvim_config/master/init.vim|$HOME/.config/nvim"
+	[".tmux.conf"]="create|$HOME/.config/tmux"
+	["tpm"]="git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm|$HOME/.tmux/plugins"
 )
 
 for file in "${!files[@]}"; do
+
 	url="${files[$file]%%|*}"
 	folder="${files[$file]#*|}"
+	first_word="${url%% *}"
 
-	if [ -f "$folder/$file" ]; then
+	if [ -e "$folder/$file" ]; then
 		echo "$file is already downloaded in $folder."
 
 	else
-		echo $folder
-		
+	
+		echo "$file checking"
+
 		if [ ! -d "$folder" ]; then
 			echo "Creating folder: $folder"
 			mkdir -p "$folder"
 		fi
 
-		echo "Downloading $file..."
-		curl -o "$folder/$file" "$url"
+		# Si hay que crear el archivo 
+		if [[ "$first_word" == "create" ]]; then
+			if [[ ! "$folder" ]]; then
+				echo "Crating folder $folder"
+				mkdir $folder
+			else
+				echo "Folder $folder already exists"
+				echo "Creating file $file"
+				touch $folder/$file
+			fi
+		fi
 
-		if [ $? -eq O ]; then
-			echo "$file downloaded succesfully."
-		else
-			echo "Failded to download $file."
+		# Si hay que clonar el archivo
+		if [[ "$first_word" == "git" ]]; then
+			eval $url
+
+		# Si hay que hacer curl al archivo
+		else	
+
+			echo "Downloading $file..."
+			curl -o "$folder/$file" "$url"
+
+			if [ $? -eq O ]; then
+				echo "$file downloaded succesfully."
+			else
+				echo "Failded to download $file."
+			fi
 		fi
 	fi
+
+done
 # ----
 
-# --- VIM PLUGS ---
+
+
+# ---- tmux plugin manager config ----
+file="$HOME/.config/tmux/tmux.conf"
+
+
+
