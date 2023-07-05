@@ -10,7 +10,8 @@ apt_packages=(
 	"curl"
 	"tmux"
 	"python3-venv"
-	"fonts-powerline"
+	"fonts-powerline" #themes requierements
+	"net-tools" #ifconfig
 )
 
 for package in "${apt_packages[@]}"; do
@@ -34,11 +35,26 @@ declare -A other_packages=(
 	["teamviewer"]="
 		wget -P ~/Downloads https://download.teamviewer.com/download/linux/teamviewer_amd64.deb &&
 		sudo apt install ~/Downloads/teamviewer_amd64.deb"
+
+	# Ejecutar esto en la carpeta donde esta el paquete ~/.local/lib/python3.10/site-packages
 	["pipx"]="
 		pip install --user pipx || exit 1
-		pipx ensurepath"
+		pipx ensurepath 				
+		python3 ~/.local/lib/python3.10/site-packages/pipx ensurepath"
+
 	["poetry"]="
 		pipx install poetry"
+
+	["code"]="
+		sudo apt-get install wget gpg
+		wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+		sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
+		sudo sh -c 'echo 'deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main' > /etc/apt/sources.list.d/vscode.list'
+		rm -f packages.microsoft.gpg
+
+		sudo apt install apt-transport-https
+		sudo apt update
+		sudo apt install code-insiders"
 )
 
 execute_command(){
@@ -63,7 +79,7 @@ declare -A files=(
 	["init.vim"]="https://raw.githubusercontent.com/kuanthum/agu_nvim_config/master/init.vim|$HOME/.config/nvim"
 	[".tmux.conf"]="create|$HOME" # In future replace this for file config in github
 	["tpm"]="git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm|$HOME/.tmux/plugins"
-	# Checkear esto
+	# Checkear esto 
 	["gnome-terminal"]="git clone https://github.com/catppuccin/gnome-terminal ~.$HOME/Agu/TermThemes|$HOME/Agu/TermThemes"
 )
 
@@ -73,6 +89,7 @@ for file in "${!files[@]}"; do
 	folder="${files[$file]#*|}"
 	first_word="${url%% *}"
 
+	# Si existe la carpeta y el archivo
 	if [ -e "$folder/$file" ]; then
 		echo "$file is already downloaded in $folder."
 
@@ -80,6 +97,7 @@ for file in "${!files[@]}"; do
 	
 		echo "$file checking"
 
+		# Si no existe la carpeta crearla
 		if [ ! -d "$folder" ]; then
 			echo "Creating folder: $folder"
 			mkdir -p "$folder"
